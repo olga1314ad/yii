@@ -75,9 +75,8 @@ class LoginForm extends Model
             if ($this->hasProperty('username')) {
                 $this->_user = User::findByUsername($this->username);
             } else {
-                $this->_user = User::findOne(['username' => self::BASIC_USERNAME]);
+                $this->_user = User::findByUsername(self::BASIC_USERNAME);
             }
-
         }
 
         return $this->_user;
