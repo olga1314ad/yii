@@ -1,66 +1,16 @@
 version: '3.9'
 
 services:
-  nginx:
-    build:
-      context: docker/nginx
-    volumes:
-      - ./:/project
-    container_name: ${PROJECT_NAME}-nginx
-    restart: always
-    ports:
-      - ${LOCALHOST_PORT}:80
-    command: nginx -g 'daemon off;'
-
-  php-fpm:
-    build:
-      context: docker/php-fpm
-    environment:
-      XDEBUG_CONFIG: "remote_host=172.18.18.1 remote_enable=1 remote_autostart=off  remote_port=9008"
-      PHP_IDE_CONFIG: "serverName=first"
-    volumes:
-      - ./:/project
-      - ./php/ini:/usr/local/etc/php
-    container_name: ${PROJECT_NAME}-php-fpm
-    depends_on:
-      - database
-
-  php-cli:
-    build:
-      context: docker/php-cli
-    volumes:
-      - ./:/project
-    command: sleep 10000
-    container_name: ${PROJECT_NAME}-php-cli
-
-  node-cli:
-    container_name: ${PROJECT_NAME}-cli
-    build:
-      context: ./docker/node-cli
-    volumes:
-      - ./:/project
-
-  frontend:
-    build: frontend
-    ports:
-      - 20080:80
-    volumes:
-      # Re-use local composer cache via host-volume
-      - ~/.composer-docker/cache:/root/.composer/cache:delegated
-      # Mount source-code for development
-      - ./:/app
-
   backend:
     build: backend
     ports:
       - 21080:80
     volumes:
-      # Re-use local composer cache via host-volume
       - ~/.composer-docker/cache:/root/.composer/cache:delegated
-      # Mount source-code for development
       - ./:/app
-      
-  ###> doctrine/doctrine-bundle ###
+    depends_on:
+      - database
+
   database:
     container_name: ${PROJECT_NAME}-db
     image: mariadb:10.3
@@ -72,7 +22,7 @@ services:
     environment:
       - MYSQL_PASSWORD=${LOCAL_USER_PASSWORD}
       - MYSQL_USER=${LOCAL_USER_LOGIN}
-      - MYSQL_DATABASE=dev
+      - MYSQL_DATABASE=${LOCAL_DB_NAME}
       - MARIADB_ROOT_PASSWORD=root
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
 
