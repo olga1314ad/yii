@@ -4,9 +4,10 @@ namespace backend\controllers;
 
 use app\helpers\AppleHelper;
 use app\models\Apple;
-use app\models\AppleSearch;
 use Yii;
+use yii\base\Request;
 use yii\data\ActiveDataProvider;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -41,8 +42,9 @@ class AppleController extends Controller
      */
     public function actionIndex()
     {
-//        $searchModel = new AppleSearch();
-//        $dataProvider = $searchModel->search(['deleted_at' => null]);
+        if ($this->request->isPost) {///
+            $this->saveEatenApples($this->request);
+        }
         $query = Apple::find()->where(['deleted_at' => null]);
 
         $dataProvider = new ActiveDataProvider([
@@ -138,5 +140,16 @@ class AppleController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
+     * @param Request $request
+     * @return void
+     */
+    private function saveEatenApples(Request $request)
+    {
+        $applesArray = ArrayHelper::getValue($request->post(), "Apple.eaten");
+        $sql = AppleHelper::makeSqlForGroupAppleUpdate($applesArray);
+        $query = \Yii::$app->db->createCommand($sql)->execute();
     }
 }

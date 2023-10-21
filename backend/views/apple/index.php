@@ -22,9 +22,9 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
     <?php $form = \yii\widgets\ActiveForm::begin([
-            'id' => 'apple_form'
+            'id' => 'apple_form',
+            'method' => 'post'
     ]);?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -67,8 +67,12 @@ $this->params['breadcrumbs'][] = $this->title;
            [
                 'format' => 'raw',
                 'value' => function($model) use ($form) {
+                    if($model->status != Apple::SPOILED){
+                        return $form->field($model, 'eaten[' .$model->id .']')
+                            ->textInput(array('value' => $model->eaten, 'type' => 'number', 'min' => $model->eaten, 'max' => 100));
+                    }
                     return $form->field($model, 'eaten[' .$model->id .']')
-                        ->textInput(['value' => $model->eaten]);
+                        ->textInput(array('value' => $model->eaten, 'disabled' => true, 'title' => 'spoiled apples can not be eaten'));
                 }
             ],
             //'condition',
@@ -81,7 +85,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
-    <?php echo Html::submitButton('Change', ['class' => 'btn btn-primary']);?>
+    <?php echo Html::submitButton('Change', ['class' => 'btn btn-primary', 'name' => 'apple_button']);?>
     <?php \yii\widgets\ActiveForm::end();?>
 
     <?php Pjax::end(); ?>
