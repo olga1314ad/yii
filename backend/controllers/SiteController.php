@@ -80,7 +80,7 @@ class SiteController extends Controller
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->redirect('apples/index');
+            return $this->redirect('/apple');
         }
 
         $model->password = '';
