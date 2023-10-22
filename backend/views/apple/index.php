@@ -65,27 +65,27 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
            [
+                'label' => "Eaten, %",
                 'format' => 'raw',
                 'value' => function($model) use ($form) {
-                    if($model->status != Apple::SPOILED){
+                    if ($model->spoiledStatus || $model->status === Apple::SPOILED) {
+                        return $form->field($model, 'spoiled[' .$model->id .']')
+                            ->textInput(array('value' => $model->eaten, 'disabled' => true, 'title' => 'spoiled apples can not be eaten'))
+                            ->label(false) ;
+                    } else if($model->status == Apple::FALLEN_STATUS){
                         return $form->field($model, 'eaten[' .$model->id .']')
-                            ->textInput(array('value' => $model->eaten, 'type' => 'number', 'min' => $model->eaten, 'max' => 100));
+                            ->textInput(array('value' => $model->eaten, 'type' => 'number', 'min' => $model->eaten, 'max' => 100))
+                            ->label(false) . '%';
                     }
                     return $form->field($model, 'eaten[' .$model->id .']')
-                        ->textInput(array('value' => $model->eaten, 'disabled' => true, 'title' => 'spoiled apples can not be eaten'));
+                        ->textInput(array('type' => 'hidden'))->label(false)
+                        . "to eat an apple you should shake the branch";
                 }
-            ],
-            //'condition',
-            //'deleted_at',
-            [
-                'class' => ActionColumn::className(),
-                'urlCreator' => function ($action, Apple $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'id' => $model->id]);
-                 }
-            ],
+            ]
         ],
     ]); ?>
     <?php echo Html::submitButton('Change', ['class' => 'btn btn-primary', 'name' => 'apple_button']);?>
+    <?php echo Html::submitButton('Shake the branch', ['class' => 'btn btn-warning', 'name' => "shake", 'id' => "shake", "value" => 1]);?>
     <?php \yii\widgets\ActiveForm::end();?>
 
     <?php Pjax::end(); ?>

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\AppleHelper;
+use yii\base\UnknownPropertyException;
 use yii\db\ActiveRecord;
 
 /**
@@ -15,6 +16,7 @@ use yii\db\ActiveRecord;
  * @property int $status
  * @property int|null $eaten
  * @property int|null $deleted_at
+ * @property int $spoiledStatus
  *
  * @property Color $color
  */
@@ -24,7 +26,7 @@ class Apple extends \yii\db\ActiveRecord
     const FALLEN_STATUS = 1;
     const SPOILED = 2;
 
-    public function beforeSave($insert)
+       public function beforeSave($insert)
     {
         if ($this->isNewRecord) {
             $this->created_at = time();
@@ -49,7 +51,7 @@ class Apple extends \yii\db\ActiveRecord
         return [
             [['color_id'], 'required'],
             [['color_id', 'status'], 'integer'],
-            [['created_at', 'fallen_at', 'deleted_at'], 'safe'],
+            [['created_at', 'fallen_at', 'deleted_at', 'soiledStatus'], 'safe'],
             [['eaten'], 'number', 'min' => 0, 'max' => 100],
             [['color_id'], 'exist', 'skipOnError' => true, 'targetClass' => Color::class, 'targetAttribute' => ['color_id' => 'color_id']],
         ];
@@ -67,7 +69,6 @@ class Apple extends \yii\db\ActiveRecord
             'fallen_at' => 'Fallen At',
             'status' => 'Status',
             'eaten' => 'Eaten',
-            'condition' => 'Condition',
             'deleted_at' => 'Deleted At',
         ];
     }
@@ -94,5 +95,9 @@ class Apple extends \yii\db\ActiveRecord
         }
         return false;
 
+    }
+
+    public function getSpoiledStatus() {
+        return ($this->fallen_at && time() - $this->fallen_at >= 3600 * 5);
     }
 }

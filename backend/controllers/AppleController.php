@@ -42,8 +42,13 @@ class AppleController extends Controller
      */
     public function actionIndex()
     {
-        if ($this->request->isPost) {///
-            $this->saveEatenApples($this->request);
+        if ($this->request->isPost) {
+            if ($this->request->post('shake')) {
+                AppleHelper::changeStatusToFallen($this->request->post('Apple'));
+            } else {
+                $this->saveEatenApples($this->request->post('Apple'));
+                AppleHelper::deleteFullyEatenApples();
+            }
         }
         $query = Apple::find()->where(['deleted_at' => null]);
 
@@ -52,7 +57,9 @@ class AppleController extends Controller
             'pagination' => [
                 'pageSize' => 10,
             ],
-            'sort' => [],
+            'sort' => [
+                'defaultOrder' => ['id' => SORT_DESC],
+            ],
         ]);
 
         return $this->render('index', [
@@ -99,18 +106,18 @@ class AppleController extends Controller
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }
+//    public function actionUpdate($id)
+//    {
+//        $model = $this->findModel($id);
+//
+//        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+//            return $this->redirect(['view', 'id' => $model->id]);
+//        }
+//
+//        return $this->render('update', [
+//            'model' => $model,
+//        ]);
+//    }
 
     /**
      * Deletes an existing Apple model.
@@ -119,12 +126,12 @@ class AppleController extends Controller
      * @return \yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
-    {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
-    }
+//    public function actionDelete($id)
+//    {
+//        $this->findModel($id)->delete();
+//
+//        return $this->redirect(['index']);
+//    }
 
     /**
      * Finds the Apple model based on its primary key value.
@@ -133,22 +140,23 @@ class AppleController extends Controller
      * @return Apple the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
-    {
-        if (($model = Apple::findOne(['id' => $id])) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
-    }
+//    protected function findModel($id)
+//    {
+//        if (($model = Apple::findOne(['id' => $id])) !== null) {
+//            return $model;
+//        }
+//
+//        throw new NotFoundHttpException('The requested page does not exist.');
+//    }
 
     /**
-     * @param Request $request
+     * @param array $appleArray
      * @return void
+     * @throws \yii\db\Exception
      */
-    private function saveEatenApples(Request $request)
+    private function saveEatenApples(array $appleArray)
     {
-        $applesArray = ArrayHelper::getValue($request->post(), "Apple.eaten");
+        $applesArray = ArrayHelper::getValue($appleArray, "eaten");
         $sql = AppleHelper::makeSqlForGroupAppleUpdate($applesArray);
         $query = \Yii::$app->db->createCommand($sql)->execute();
     }
