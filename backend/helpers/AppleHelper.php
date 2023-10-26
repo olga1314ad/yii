@@ -8,16 +8,12 @@ use yii\helpers\ArrayHelper;
 
 class AppleHelper
 {
-    /**
-     * @return false|mixed
-     */
+
     public static function getRandomExistingColor()
     {
-        $colorIds = Color::find()->select('color_id')->column();
-        if (!empty($colorIds)) {
-            return $colorIds[rand(0, (count($colorIds) - 1))];
-        }
-        return false;
+        $color = Color::find()->select('color_id')->orderBy('RAND()')->one();
+
+        return $color->color_id ?? 0;
     }
 
     /**
