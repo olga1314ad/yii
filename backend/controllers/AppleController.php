@@ -42,6 +42,8 @@ class AppleController extends Controller
      */
     public function actionIndex()
     {
+
+        var_dump(1);
         if ($this->request->isPost) {
             if ($this->request->post('shake')) {
                 AppleHelper::changeStatusToFallen($this->request->post('Apple'));
